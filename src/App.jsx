@@ -238,64 +238,74 @@ function Filters({ people, funciones, value, onChange }) {
   const [funcion, setFuncion] = useState(value.funcion || "Todas");
 
   useEffect(() => { onChange({ personas: Array.from(personas), dia, turno, modalidad, funcion }); }, [personas, dia, turno, modalidad, funcion]);
-  useEffect(() => { if (!value.personas || value.personas.length===0) setPersonas(new Set(people)); }, [people]);
+  useEffect(() => { if (value.personas === undefined || value.personas.length===0) setPersonas(new Set(people)); }, [people]);
 
   const togglePersona = (p) => setPersonas(prev => { const n = new Set(prev); n.has(p) ? n.delete(p) : n.add(p); return n; });
 
   return (
-    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-6 bg-white/60 backdrop-blur border border-neutral-200 rounded-2xl p-3">
-      <div className="flex flex-col gap-1 lg:col-span-2">
-        <label className="text-xs text-neutral-600">Personas</label>
-        <div className="flex items-center gap-3 mb-1 text-xs">
-          <button type="button" onClick={()=> setPersonas(new Set(people))} className="px-2 py-1 border rounded-full bg-white">Seleccionar todo</button>
-          <button type="button" onClick={()=> setPersonas(new Set())} className="px-2 py-1 border rounded-full bg-white">Limpiar</button>
-          <span className="text-neutral-500">{personas.size} seleccionad{personas.size===1? 'a':'os'}</span>
+    <div className="bg-white/60 backdrop-blur border border-neutral-200 rounded-2xl p-4">
+      <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-4">
+        {/* Personas */}
+        <div className="flex flex-col gap-2 lg:col-span-2 xl:col-span-1">
+          <label className="text-xs font-medium text-neutral-600">Personas</label>
+          <div className="flex items-center gap-2 mb-1 text-xs flex-wrap">
+            <button type="button" onClick={()=> setPersonas(new Set(people))} className="px-2 py-1 border rounded-full bg-white hover:bg-neutral-50">Seleccionar todo</button>
+            <button type="button" onClick={()=> setPersonas(new Set())} className="px-2 py-1 border rounded-full bg-white hover:bg-neutral-50">Limpiar</button>
+            <span className="text-neutral-500">{personas.size} seleccionad{personas.size===1? 'a':'os'}</span>
+          </div>
+          <div className="flex flex-col gap-2">
+            {people.map(p => (
+              <label key={p} className="flex items-center gap-2 border rounded-xl px-3 py-2 bg-white cursor-pointer hover:bg-neutral-50" style={{borderColor: PERSON_COLORS[p]}}>
+                <input type="checkbox" checked={personas.has(p)} onChange={()=>togglePersona(p)} className="cursor-pointer" />
+                <span className="w-2 h-2 rounded-full flex-shrink-0" style={{backgroundColor: PERSON_COLORS[p]}} />
+                <span className="text-sm font-medium" style={{color: PERSON_COLORS[p]}}>{p}</span>
+              </label>
+            ))}
+          </div>
         </div>
-        <div className="grid grid-cols-2 xl:grid-cols-4 gap-2">
-          {people.map(p => (
-            <label key={p} className="flex items-center gap-2 border rounded-xl px-2 py-1 bg-white" style={{borderColor: PERSON_COLORS[p]}}>
-              <input type="checkbox" checked={personas.has(p)} onChange={()=>togglePersona(p)} />
-              <span className="w-2 h-2 rounded-full" style={{backgroundColor: PERSON_COLORS[p]}} />
-              <span className="text-sm" style={{color: PERSON_COLORS[p]}}>{p}</span>
-            </label>
-          ))}
-        </div>
-      </div>
 
-      <div className="flex flex-col gap-1">
-        <label className="text-xs text-neutral-600">Día</label>
-        <select value={dia} onChange={(e)=>setDia(e.target.value)} className="w-full border rounded-xl p-2">
-          <option>Todos</option>
-          {DIAS.map(d=> <option key={d}>{d}</option>)}
-        </select>
-      </div>
-      <div className="flex flex-col gap-1">
-        <label className="text-xs text-neutral-600">Turno</label>
-        <select value={turno} onChange={(e)=>setTurno(e.target.value)} className="w-full border rounded-xl p-2">
-          <option>Todos</option>
-          {TURNOS.map(t=> <option key={t}>{t}</option>)}
-        </select>
-      </div>
-      <div className="flex flex-col gap-1">
-        <label className="text-xs text-neutral-600">Modalidad</label>
-        <div className="flex items-center gap-3 px-2">
-          {["Presencial","Remoto"].map(m => (
-            <label key={m} className="text-sm flex items-center gap-2">
-              <input type="checkbox" checked={modalidad[m]} onChange={(e)=>setModalidad(v=>({...v,[m]:e.target.checked}))}/>
-              {m}
-            </label>
-          ))}
+        {/* Día y Turno */}
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-2">
+            <label className="text-xs font-medium text-neutral-600">Día</label>
+            <select value={dia} onChange={(e)=>setDia(e.target.value)} className="w-full border rounded-xl p-2 bg-white">
+              <option>Todos</option>
+              {DIAS.map(d=> <option key={d}>{d}</option>)}
+            </select>
+          </div>
+          <div className="flex flex-col gap-2">
+            <label className="text-xs font-medium text-neutral-600">Turno</label>
+            <select value={turno} onChange={(e)=>setTurno(e.target.value)} className="w-full border rounded-xl p-2 bg-white">
+              <option>Todos</option>
+              {TURNOS.map(t=> <option key={t}>{t}</option>)}
+            </select>
+          </div>
         </div>
-      </div>
-      <div className="flex flex-col gap-1">
-        <label className="text-xs text-neutral-600">Función</label>
-        <select value={funcion} onChange={(e)=>setFuncion(e.target.value)} className="w-full border rounded-xl p-2">
-          <option>Todas</option>
-          {Array.from(new Set(funciones.map(f=>f.funcion))).map(fn => (
-            <option key={fn}>{fn}</option>
-          ))}
-        </select>
-        <p className="text-[11px] text-neutral-500 mt-1">Filtra por personas asociadas (hoja "DB (Funciones)").</p>
+
+        {/* Modalidad */}
+        <div className="flex flex-col gap-2">
+          <label className="text-xs font-medium text-neutral-600">Modalidad</label>
+          <div className="flex flex-col gap-3 bg-white border rounded-xl p-3">
+            {["Presencial","Remoto"].map(m => (
+              <label key={m} className="text-sm flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" checked={modalidad[m]} onChange={(e)=>setModalidad(v=>({...v,[m]:e.target.checked}))} className="cursor-pointer" />
+                <span>{m}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        {/* Función */}
+        <div className="flex flex-col gap-2">
+          <label className="text-xs font-medium text-neutral-600">Función</label>
+          <select value={funcion} onChange={(e)=>setFuncion(e.target.value)} className="w-full border rounded-xl p-2 bg-white">
+            <option>Todas</option>
+            {Array.from(new Set(funciones.map(f=>f.funcion))).map(fn => (
+              <option key={fn}>{fn}</option>
+            ))}
+          </select>
+          <p className="text-[11px] text-neutral-500">Filtra por personas asociadas a esta función.</p>
+        </div>
       </div>
     </div>
   );
@@ -369,7 +379,7 @@ function GridView({ items }) {
   }, [items]);
 
   return (
-    <div className="overflow-x-auto">
+    <div className="w-full overflow-x-auto -mx-4 px-4">
       <div className="min-w-[900px] grid" style={{gridTemplateColumns: `160px repeat(${DIAS.length}, minmax(0,1fr))`, gap: 8}}>
         <div className="h-10" />
         {DIAS.map(d => <div key={d} className="h-10 text-center font-semibold bg-white border rounded-xl flex items-center justify-center">{d}</div>)}
@@ -451,7 +461,7 @@ function CalendarView({ items }) {
   const hours = []; for (let m=minM; m<=maxM; m+=60) hours.push(m);
 
   return (
-    <div className="overflow-x-auto">
+    <div className="w-full overflow-x-auto -mx-4 px-4">
       <div className="min-w-[900px] grid" style={{gridTemplateColumns: `100px repeat(${DIAS.length}, minmax(0,1fr))`, gap: 8}}>
         <div />
         {DIAS.map(d => <div key={d} className="text-center font-semibold bg-white border rounded-xl h-10 flex items-center justify-center">{d}</div>)}
@@ -542,8 +552,8 @@ export default function App() {
   const withPerms = useMemo(() => applyPermisos(filtered, permisos), [filtered, permisos]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#f8fafc] to-[#eef2ff] text-neutral-900">
-      <div className="max-w-7xl mx-auto px-4 py-6">
+    <div className="min-h-screen bg-gradient-to-b from-[#f8fafc] to-[#eef2ff] text-neutral-900 overflow-x-hidden">
+      <div className="max-w-7xl mx-auto px-4 py-6 w-full">
         <header className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between mb-4">
           <div>
             <h1 className="text-2xl font-semibold tracking-tight">Horario Administrativo — Pueblo Libre</h1>
