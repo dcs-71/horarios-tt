@@ -583,7 +583,7 @@ export default function App() {
         </main>
 
         <footer className="text-xs text-neutral-500 mt-8">
-          <p>Tip: verifica acceso público del Sheet y los nombres exactos de hojas: "DB (Horario)", "DB (Funciones)" y "DB (Permisos)". La app usa GViz CSV. Si falla, se usa un fallback local para demo.</p>
+          <p>Tip: verifica acceso público del Sheet y los nombres exactos de hojas: "DB (Horario)", "DB (Funciones)" y "DB (Permisos)". La app usa GViz CSV.</p>
         </footer>
       </div>
     </div>
