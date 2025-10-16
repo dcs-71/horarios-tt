@@ -17,35 +17,64 @@ const DIAS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
 const TURNOS = ["Abre local", "Mañana", "Tarde", "Cierra local"]; // "Cierra local" al final
 
 // ===================== Utilidades =====================
+
 const csvToRows = (text) => {
-  // separa líneas y respeta campos con comillas
+  text = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+  // separa líneas y respeta campos con comillas, maneja celdas vacías correctamente
   const rows = [];
   let i = 0, field = "", row = [], inQuotes = false;
   const pushField = () => { row.push(field); field = ""; };
+  
   for (; i < text.length; i++) {
     const c = text[i];
     if (c === '"') {
-      if (inQuotes && text[i + 1] === '"') { field += '"'; i++; }
-      else { inQuotes = !inQuotes; }
-    } else if (c === "," && !inQuotes) { pushField(); }
-    else if ((c === "\n" || c === "\r") && !inQuotes) {
-      if (field !== "" || row.length) pushField();
-      if (row.length) { rows.push(row); row = []; }
-    } else { field += c; }
+      if (inQuotes && text[i + 1] === '"') { 
+        field += '"'; 
+        i++; 
+      } else { 
+        inQuotes = !inQuotes; 
+      }
+    } else if (c === "," && !inQuotes) { 
+      pushField(); 
+    } else if ((c === "\n" || c === "\r") && !inQuotes) {
+      // Siempre pushear el campo actual antes de terminar la fila
+      pushField();
+      if (row.length > 0) { 
+        rows.push(row); 
+        row = []; 
+      }
+      // Saltar \r\n juntos
+      if (c === "\r" && text[i + 1] === "\n") {
+        i++;
+      }
+    } else { 
+      field += c; 
+    }
   }
-  if (field !== "" || row.length) { pushField(); rows.push(row); }
-  return rows.filter(r => r.some(v => v !== ""));
+  
+  // Procesar el último campo y fila si existen
+  if (field.length > 0 || row.length > 0) { 
+    pushField(); 
+  }
+  if (row.length > 0) {
+    rows.push(row);
+  }
+  
+  // Filtrar filas completamente vacías
+  return rows.filter(r => r.some(v => v.trim() !== ""));
 };
 
 const parseTimeToMin = (s) => {
   if (!s) return null;
   const str = String(s).trim().toLowerCase();
-  const m = str.match(/(\d{1,2}):(\d{2})(?:\s*(am|pm))?/i);
+  const m = str.match(/(\d{1,2}):(\d{2})\s*(a\.?\s*m\.?|p\.?\s*m\.?)?/i);
   if (!m) return null;
   let h = parseInt(m[1], 10);
   const min = parseInt(m[2], 10);
-  const ap = m[3];
+
+  let ap = m[3];
   if (ap) {
+    ap = ap.toLowerCase().replace(/[\s.]/g, '').trim()
     if (ap === "pm" && h !== 12) h += 12;
     if (ap === "am" && h === 12) h = 0;
   }
@@ -163,7 +192,12 @@ function useSheetsData() {
         // ---- Horario
         const rowsH = csvToRows(csvH);
         const headH = rowsH[0];
-        const col = (name) => headH.findIndex((h) => h.trim().toLowerCase() === name.toLowerCase());
+        const col = (name) => {
+          const target = name.trim().toLowerCase();
+          const idx = headH.findIndex(h => h && h.trim().toLowerCase().includes(target));
+          if (idx === -1) console.warn(`⚠️ No se encontró columna para "${name}"`);
+          return idx;
+        };
         const idxDia = col("Día");
         const idxTurno = col("Turno");
         const idxNombre = col("Nombre");
