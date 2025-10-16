@@ -617,7 +617,7 @@ export default function App() {
         </main>
 
         <footer className="text-xs text-neutral-500 mt-8">
-          <p>Verificar el acceso público del Spradsheet y los nombres exactos de hojas: "DB (Horario)", "DB (Funciones)" y "DB (Permisos)". La app usa GViz CSV.</p>
+          <p>Para su correcto funcionamiento verificar el acceso público del Spreadsheet, formatos y los nombres exactos de hojas: "DB (Horario)", "DB (Funciones)" y "DB (Permisos)"</p>
         </footer>
       </div>
     </div>
